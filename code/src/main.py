@@ -2,9 +2,9 @@ import gradio as gr
 import json
 import logging
 import re
-from rag_system_updated import NetworkRAGSystem
-from full_mcp_implementation import create_mcp_system, AgentContext
-from langgraph_device_search_agent import LangGraphDeviceSearchAgent
+from rag_system import NetworkRAGSystem
+from mcp import create_mcp_system, AgentContext
+from search import LangGraphDeviceSearchAgent
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from langchain_community.llms import HuggingFacePipeline
 
@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gradio_app")
 
 # Initialize the RAG system with correct path
-rag_system = NetworkRAGSystem(knowledge_base_path="/content/agentic_rag-mcp_system/network_knowledge_base.txt")
+rag_system = NetworkRAGSystem(knowledge_base_path='/code/src/knowledge_base.txt')
 
 # Initialize the LLM for LangGraph
 def init_llm_for_langgraph():
