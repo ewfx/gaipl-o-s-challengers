@@ -1,0 +1,14 @@
+gradio
+pydantic
+transformers
+pysqlite3-binary
+chromadb
+sentence-transformers
+langchain
+langchain-community
+langgraph>=0.0.20
+transformers
+torch
+networkx
+pandas
+numpy

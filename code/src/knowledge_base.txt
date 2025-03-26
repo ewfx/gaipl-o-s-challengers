@@ -1,0 +1,441 @@
+
+# DEVICE INVENTORY DOCUMENTS #
+DOCUMENT INV1:
+Core Network Devices
+- Device ID: R001
+  Name: core-router-01
+  Type: router
+  Status: active
+  Location: NYC
+  Importance: critical
+  Description: Primary core router for east region datacenter
+  Connected to: WAN001, S001A, S001B
+
+- Device ID: R002
+  Name: core-router-02
+  Type: router
+  Status: active
+  Location: SFO
+  Importance: critical
+  Description: Primary core router for west region datacenter
+  Connected to: WAN002, S002A, S002B
+
+- Device ID: FW001
+  Name: edge-firewall-01
+  Type: firewall
+  Status: active
+  Location: NYC
+  Importance: critical
+  Description: Primary internet-facing firewall for east region
+  Connected to: R001, DMZ001
+
+DOCUMENT INV2:
+Distribution Network Devices
+- Device ID: S001A
+  Name: distribution-switch-01a
+  Type: switch
+  Status: active
+  Location: NYC
+  Importance: high
+  Description: Primary distribution switch for NYC east zone
+  Connected to: R001, S001A1, S001A2
+
+- Device ID: S001B
+  Name: distribution-switch-01b
+  Type: switch
+  Status: active
+  Location: NYC
+  Importance: high
+  Description: Secondary distribution switch for NYC east zone
+  Connected to: R001, S001B1, S001B2
+
+- Device ID: S002A
+  Name: distribution-switch-02a
+  Type: switch
+  Status: active
+  Location: SFO
+  Importance: high
+  Description: Primary distribution switch for SFO north zone
+  Connected to: R002, S002A1, S002A2
+
+DOCUMENT INV3:
+Access Network Devices
+- Device ID: S001A1
+  Name: access-switch-01a1
+  Type: switch
+  Status: active
+  Location: NYC-Floor1
+  Importance: medium
+  Description: Access switch for NYC east zone floor 1
+  Connected to: S001A, Various endpoints
+
+- Device ID: S001A2
+  Name: access-switch-01a2
+  Type: switch
+  Status: active
+  Location: NYC-Floor2
+  Importance: medium
+  Description: Access switch for NYC east zone floor 2
+  Connected to: S001A, Various endpoints
+
+- Device ID: S001B1
+  Name: access-switch-01b1
+  Type: switch
+  Status: warning
+  Location: NYC-Floor3
+  Importance: medium
+  Description: Access switch for NYC east zone floor 3 (showing interface errors)
+  Connected to: S001B, Various endpoints
+
+DOCUMENT INV4:
+Special Purpose Devices
+- Device ID: LB001
+  Name: load-balancer-01
+  Type: load-balancer
+  Status: active
+  Location: NYC
+  Importance: high
+  Description: F5 load balancer for customer-facing applications
+  Connected to: S001A, APP001, APP002, APP003
+
+- Device ID: WAP001
+  Name: wireless-controller-01
+  Type: wireless-controller
+  Status: active
+  Location: NYC
+  Importance: medium
+  Description: Controls all wireless access points in NYC office
+  Connected to: S001A
+
+- Device ID: DMZ001
+  Name: dmz-switch-01
+  Type: switch
+  Status: active
+  Location: NYC
+  Importance: high
+  Description: DMZ network switch
+  Connected to: FW001, WEB001, WEB002
+
+# TROUBLESHOOTING DOCUMENTS #
+
+DOCUMENT T1:
+Router High CPU Troubleshooting Guide
+When a router shows high CPU utilization (>80%), first identify the process consuming resources with 'show processes cpu'.
+Common causes include:
+1. Routing protocol misconfiguration or instability (BGP flapping, OSPF reconvergence)
+2. Access Control List (ACL) processing for high traffic volumes
+3. Network Address Translation (NAT) for numerous concurrent sessions
+4. Denial of Service (DoS) attacks or traffic anomalies
+5. Logging verbosity set too high
+Resolution steps:
+- Check for routing protocol issues with 'show ip route summary' and 'show ip protocol'
+- Review ACL configurations and consider hardware acceleration
+- Monitor interface errors with 'show interface' for physical issues
+- Implement Control Plane Policing (CoPP) for protection
+Priority: High (Critical for core routers, Medium for edge devices)
+
+DOCUMENT T2:
+Network Latency and Packet Loss Resolution
+Latency and packet loss often occur together and can severely impact application performance.
+Troubleshooting approach:
+1. Quantify the issue - use ping and traceroute to measure latency and loss percentage
+2. Isolate the problem area - test segments of the network path separately
+3. Check physical connectivity - look for interface errors, duplex mismatches
+4. Review QoS configuration - ensure proper traffic prioritization
+5. Monitor for microbursts - short traffic spikes that cause buffer overflows
+Common root causes:
+- Congestion on interfaces (check with 'show interface' for drops/discards)
+- Suboptimal routing (check with 'show ip route' and 'traceroute')
+- Faulty hardware or cabling (check error counters and interface status)
+- MTU mismatches or fragmentation issues
+Priority: High (Can significantly impact user experience)
+
+DOCUMENT T3:
+Switch Port Errors and Performance Issues
+Port errors on switches often indicate physical or data link layer problems.
+Error types and causes:
+- CRC errors: Often caused by cabling issues, EMI, or duplex mismatches
+- Collisions: Typically seen in half-duplex environments
+- Input/output errors: Can indicate buffer issues or hardware problems
+- Late collisions: Usually a sign of cable length violations or duplex mismatch
+Troubleshooting steps:
+1. Check error statistics with 'show interface' or 'show interface counters errors'
+2. Verify duplex and speed settings on both ends of the connection
+3. Test or replace cabling if physical issues are suspected
+4. Check for port utilization and buffer exhaustion
+5. Verify STP (Spanning Tree Protocol) status and configuration
+Priority: Medium (Unless affecting critical services)
+
+# OBSERVABILITY DOCUMENTS #
+
+DOCUMENT O1:
+Network Metric Baselines and Thresholds
+Understanding normal behavior is essential for effective monitoring.
+Key metrics and typical thresholds:
+- Interface utilization: Alert at 70% sustained, Critical at 90%
+- CPU utilization: Alert at 70% sustained, Critical at 90%
+- Memory utilization: Alert at 80% sustained, Critical at 95%
+- Packet loss: Alert at 1%, Critical at 5%
+- Latency (internal network): Alert at 10ms, Critical at 50ms
+- Jitter: Alert at 10ms, Critical at 30ms
+Seasonal patterns:
+- Business hours typically show 2-3x higher utilization than off-hours
+- Month-end processing may increase database traffic by 50%
+- Backup windows may saturate certain links during scheduled times
+Recommended approach: Establish baselines over 2-4 weeks of normal operation before setting thresholds.
+
+DOCUMENT O2:
+Detecting Network Performance Anomalies
+Anomaly detection requires correlation of multiple metrics.
+Common anomalies and their signatures:
+1. DDoS attacks: Sudden increase in traffic volume, connection counts, and CPU usage
+2. Routing flaps: Intermittent connectivity, increased CPU, routing protocol messages
+3. Broadcast storms: High broadcast/multicast packet counts, increased latency
+4. Link flapping: Interface status changes, routing reconvergence, packet loss
+5. Memory leaks: Gradually increasing memory usage without corresponding traffic increase
+Detection methods:
+- Rate of change is often more important than absolute values
+- Correlate metrics across multiple devices to identify systemic issues
+- Look for divergence from historical patterns at similar time periods
+- Set dynamic thresholds based on standard deviations from baseline
+
+DOCUMENT O3:
+Network Capacity Planning and Trending
+Proactive capacity management prevents performance issues.
+Key metrics to trend:
+- Interface throughput (95th percentile usage over time)
+- Growth rate of connected devices and users
+- Connection rates and session counts
+- Application-specific metrics (response times, transaction rates)
+Warning signs requiring attention:
+- Consistent growth of >5% per month on critical links
+- Latency increases during peak periods
+- Reduction in available headroom below 30%
+- Step changes in utilization patterns
+Planning guidelines:
+- Plan capacity upgrades when projected to reach 70% within 6 months
+- Consider redundancy and failover capacity in calculations
+- Account for seasonal variations and special events
+
+# DEVICE SEARCH DOCUMENTS #
+
+DOCUMENT D1:
+Network Topology Fundamentals
+Understanding dependencies between network devices is crucial for impact analysis.
+Network layers and dependencies:
+1. Core layer: High-speed backbone, minimal configuration, maximum reliability
+2. Distribution layer: Routing, filtering, QoS, and policy enforcement
+3. Access layer: End-user connectivity, security features, and service delivery
+Critical paths:
+- Default gateway dependency: End users depend on their default gateway
+- Uplink dependency: Access switches depend on distribution switches
+- Routing peer dependency: Routers depend on their routing neighbors
+Redundancy considerations:
+- Single points of failure should be identified and mitigated
+- Redundant paths should not share physical infrastructure
+- Control plane redundancy is as important as data plane redundancy
+
+DOCUMENT D2:
+Network Device Roles and Classification
+Properly classifying device roles helps with troubleshooting and change management.
+Common device roles:
+- Core router: Central backbone connectivity and routing
+- Edge router: Internet or WAN connectivity
+- Distribution switch: Aggregation and policy enforcement
+- Access switch: End-user and device connectivity
+- Firewall: Security policy enforcement and segmentation
+- Load balancer: Application traffic distribution and health monitoring
+- WAN optimizer: Traffic compression and protocol optimization
+Criticality classification:
+- Tier 1: Failure affects entire network or critical business services
+- Tier 2: Failure affects multiple departments or non-critical services
+- Tier 3: Failure affects limited number of users or services
+Change management implications:
+- Tier 1 devices require more rigorous testing and maintenance windows
+- Dependencies should be documented and considered during changes
+- Backup configurations must be verified before significant changes
+
+DOCUMENT D3:
+High-Availability Network Design Patterns
+Resilient networks require both redundancy and proper failover mechanisms.
+Key high-availability patterns:
+1. Active/Standby: Primary device with backup that takes over on failure
+2. Active/Active: Load shared across multiple devices with failover capability
+3. N+1 redundancy: Additional capacity beyond what's required for normal operation
+4. Distributed systems: Services spread across multiple devices with no single point of failure
+Implementation technologies:
+- Routing redundancy: HSRP, VRRP, GLBP for default gateway redundancy
+- Link redundancy: Equal-cost multi-path, port channels, spanning tree
+- Control plane redundancy: NSF (Non-Stop Forwarding), SSO (Stateful Switchover)
+- Device redundancy: Clustered systems, chassis redundancy, geographic distribution
+Recovery metrics:
+- RTO (Recovery Time Objective): Maximum acceptable time to restore service
+- RPO (Recovery Point Objective): Maximum acceptable data loss during recovery
+- MTTR (Mean Time To Repair): Average time to restore service after failure
+
+# KNOWLEDGE BASE DOCUMENTS #
+
+DOCUMENT K1:
+Network Protocol Troubleshooting Quick Reference
+Common protocols and troubleshooting approaches:
+1. TCP/IP:
+   - Check IP addressing and subnet configuration
+   - Verify routing tables and default gateways
+   - Test with ping, traceroute, and packet captures
+   - Common issues: Address conflicts, fragmentation, MTU issues
+2. DNS:
+   - Verify DNS server configuration
+   - Test resolution with nslookup or dig
+   - Check for latency or timeouts
+   - Common issues: Incorrect DNS servers, cache poisoning, zone transfer failures
+3. DHCP:
+   - Verify DHCP server availability
+   - Check IP address pool exhaustion
+   - Test with ipconfig /release and renew
+   - Common issues: Address conflicts, unauthorized DHCP servers, misconfigured scopes
+4. BGP:
+   - Verify neighbor relationships
+   - Check for route advertisements and withdrawals
+   - Review AS path and route selection
+   - Common issues: Peer misconfigurations, route flapping, policy errors
+5. OSPF:
+   - Verify neighbor adjacencies
+   - Check for area configuration consistency
+   - Review LSA database
+   - Common issues: Area mismatches, authentication failures, MTU mismatches
+
+DOCUMENT K2:
+Network Security Best Practices
+Essential security measures for network infrastructure:
+1. Device hardening:
+   - Disable unused services and ports
+   - Implement strong password policies
+   - Use encrypted management protocols (SSH, HTTPS)
+   - Regular patching and firmware updates
+2. Access control:
+   - Implement principle of least privilege
+   - Use AAA (Authentication, Authorization, Accounting)
+   - Secure management plane with ACLs
+   - Implement role-based access control
+3. Traffic filtering:
+   - Deploy firewalls at network boundaries
+   - Use ACLs for basic traffic filtering
+   - Implement deep packet inspection where needed
+   - Regularly audit and clean up rule sets
+4. Monitoring and detection:
+   - Enable logging and send to central collector
+   - Implement network behavior analysis
+   - Deploy IDS/IPS systems at critical points
+   - Regular review of security events
+5. Incident response:
+   - Documented procedures for common security incidents
+   - Ability to quickly implement traffic filtering
+   - Regular security drills and testing
+   - Forensic data collection capabilities
+
+DOCUMENT K3:
+QoS Configuration Guidelines
+Quality of Service implementation best practices:
+1. Classification methods:
+   - Layer 2: 802.1p CoS (3 bits, values 0-7)
+   - Layer 3: IP Precedence (3 bits, values 0-7) or DSCP (6 bits, values 0-63)
+   - Application recognition: NBAR or deep packet inspection
+2. Queuing mechanisms:
+   - Priority Queuing (PQ): Strict priority for delay-sensitive traffic
+   - Weighted Fair Queuing (WFQ): Balanced bandwidth sharing
+   - Class-Based Weighted Fair Queuing (CBWFQ): Class-based bandwidth allocation
+   - Low Latency Queuing (LLQ): Combines CBWFQ with priority queue
+3. Common service classes:
+   - Voice: EF (DSCP 46), strict priority, minimal delay
+   - Video: AF41 (DSCP 34), guaranteed bandwidth
+   - Critical data: AF31 (DSCP 26), guaranteed bandwidth
+   - Best effort: Default (DSCP 0), remaining bandwidth
+4. Implementation guidelines:
+   - Classify and mark traffic as close to the source as possible
+   - Be consistent with classifications across the network
+   - Don't assign more than 33% to priority queue to avoid starvation
+   - Monitor effectiveness with performance metrics
+
+# INCIDENT RESOLUTION DOCUMENTS #
+
+DOCUMENT I1:
+Incident Severity Classification and Response
+Standard incident severity levels and response expectations:
+1. Critical (Severity 1):
+   - Definition: Complete outage of a critical business service
+   - Response time: Immediate (15 minutes or less)
+   - Resolution goal: 4 hours or less
+   - Escalation: Automatic to senior engineers and management
+   - Communication: Hourly updates to stakeholders
+2. High (Severity 2):
+   - Definition: Significant degradation of critical service or complete outage of non-critical service
+   - Response time: 30 minutes or less
+   - Resolution goal: 8 hours or less
+   - Escalation: To senior engineers after 2 hours if unresolved
+   - Communication: Updates every 2 hours
+3. Medium (Severity 3):
+   - Definition: Minor service degradation or issue affecting small user group
+   - Response time: 2 hours or less
+   - Resolution goal: 24 hours or less
+   - Escalation: To senior engineers after 8 hours if unresolved
+   - Communication: Daily updates
+4. Low (Severity 4):
+   - Definition: Minimal impact, often a single user or cosmetic issue
+   - Response time: Next business day
+   - Resolution goal: Within 5 business days
+   - Escalation: Based on SLA adherence
+   - Communication: As needed or requested
+
+DOCUMENT I2:
+Root Cause Analysis Methodology
+Structured approach to identifying incident root causes:
+1. Data collection phase:
+   - Gather all logs and monitoring data
+   - Document timeline of events
+   - Collect configuration files and changes
+   - Interview involved personnel
+2. Analysis techniques:
+   - Timeline analysis: Map all events chronologically
+   - Change analysis: Review recent changes prior to incident
+   - Correlation analysis: Identify patterns across multiple data sources
+   - The "5 Whys" technique: Repeatedly ask why to drill down to root cause
+3. Categorization framework:
+   - Technology issues: Hardware failures, software bugs, capacity limits
+   - Process issues: Inadequate procedures, missed steps, poor communication
+   - People issues: Training gaps, human error, resource constraints
+4. Documentation requirements:
+   - Incident summary and impact
+   - Timeline of key events
+   - Root cause statement (specific, factual, and actionable)
+   - Contributing factors
+   - Recommendations to prevent recurrence
+
+DOCUMENT I3:
+Incident Communication Templates
+Standardized communication formats for effective incident management:
+1. Initial notification:
+   - Incident identifier and timestamp
+   - Brief description of the issue
+   - Known impact (services and users affected)
+   - Current status (investigating, identified, in progress)
+   - Next update timing
+2. Status update:
+   - Reference to incident identifier
+   - Current status and progress
+   - Actions taken since last update
+   - Current impact assessment
+   - Estimated time to resolution (if known)
+   - Next update timing
+3. Resolution notification:
+   - Reference to incident identifier
+   - Confirmation of resolution
+   - Brief description of solution implemented
+   - Current service status
+   - Duration of incident
+   - Follow-up activities planned
+4. Post-incident summary:
+   - Incident overview and duration
+   - Root cause and contributing factors
+   - Resolution steps taken
+   - Preventive measures identified
+  - Lessons learned and recommendations
